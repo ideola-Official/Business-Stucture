@@ -68,41 +68,63 @@ export function runSimulation(
     });
   }
 
-  // Calculate traffic through each node
-  let currentTraffic = initialTraffic;
+  // Calculate traffic through each node with connection-level conversion rates
+  trafficMap.set(entryNodes[0].id, initialTraffic);
   
   nodeOrder.forEach((node, index) => {
-    const beforeTraffic = currentTraffic;
+    // Get incoming connections to this node
+    const incomingConnections = connections.filter(c => c.to === node.id);
     
-    // Apply conversion rate if exists
-    if (node.data.conversionRate) {
-      let effectiveRate = node.data.conversionRate;
-      
-      // Apply complexity penalty
-      if (node.data.complexity === 'mid') {
-        effectiveRate *= 0.9; // -10%
-      } else if (node.data.complexity === 'high') {
-        effectiveRate *= 0.8; // -20%
-      }
-      
-      currentTraffic = Math.floor(currentTraffic * (effectiveRate / 100));
+    let nodeTraffic = 0;
+    
+    if (index === 0) {
+      // Entry node gets initial traffic
+      nodeTraffic = initialTraffic;
+    } else {
+      // Calculate traffic from all incoming connections
+      incomingConnections.forEach(conn => {
+        const sourceTraffic = trafficMap.get(conn.from) || 0;
+        
+        // Use connection's conversionRate if set, otherwise use node's conversionRate
+        let conversionRate = 100; // Default 100%
+        
+        if (conn.metrics?.conversionRate !== undefined && conn.metrics.conversionRate > 0) {
+          // 사용자가 설정한 연결의 전환율 사용 (스마트 엣지)
+          conversionRate = conn.metrics.conversionRate;
+        } else if (node.data.conversionRate) {
+          // 노드 자체의 전환율 사용
+          conversionRate = node.data.conversionRate;
+          
+          // Apply complexity penalty
+          if (node.data.complexity === 'mid') {
+            conversionRate *= 0.9; // -10%
+          } else if (node.data.complexity === 'high') {
+            conversionRate *= 0.8; // -20%
+          }
+        }
+        
+        nodeTraffic += Math.floor(sourceTraffic * (conversionRate / 100));
+      });
     }
     
     // Check willingness to pay for payment nodes
     if (node.type === 'payment') {
       const customerNode = nodes.find(n => n.type === 'customer');
       if (customerNode && node.data.price > customerNode.data.willingnessToPay) {
-        currentTraffic = 0; // Price too high, no conversions
+        nodeTraffic = 0; // Price too high, no conversions
       }
     }
     
-    const dropoff = beforeTraffic - currentTraffic;
+    const beforeTraffic = index > 0 
+      ? incomingConnections.reduce((sum, conn) => sum + (trafficMap.get(conn.from) || 0), 0)
+      : initialTraffic;
+    const dropoff = beforeTraffic - nodeTraffic;
     
-    trafficMap.set(node.id, currentTraffic);
+    trafficMap.set(node.id, nodeTraffic);
     
     funnel.push({
       stage: node.data.name || node.type,
-      users: currentTraffic,
+      users: nodeTraffic,
       dropoff: dropoff,
     });
   });

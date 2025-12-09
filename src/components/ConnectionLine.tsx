@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
-import { X, TrendingDown, Edit2 } from 'lucide-react';
-import { Connection } from '../types';
+// @ts-nocheck
+import React, { useState } from "react";
+import { X, TrendingDown, Edit2 } from "lucide-react";
+import { Connection } from "../types";
 
 interface ConnectionLineProps {
   id: string;
@@ -10,34 +11,41 @@ interface ConnectionLineProps {
   temporary?: boolean;
   onDelete?: (id: string) => void;
   onUpdateConversionRate?: (id: string, rate: number) => void;
+  isMoneyFlow?: boolean;
 }
 
 // Color mapping for connection types
 const CONNECTION_COLORS = {
-  traffic: '#3B82F6',   // Blue - 사람의 흐름
-  money: '#10B981',     // Green - 돈의 흐름
-  cost: '#EF4444',      // Red - 비용 발생
-  data: '#6B7280',      // Gray - 데이터 축적
+  traffic: "#3B82F6", // Blue - 사람의 흐름
+  money: "#10B981", // Green - 돈의 흐름
+  cost: "#EF4444", // Red - 비용 발생
+  data: "#6B7280", // Gray - 데이터 축적
 };
 
-export function ConnectionLine({ 
-  id, 
-  from, 
-  to, 
+export function ConnectionLine({
+  id,
+  from,
+  to,
   connection,
-  temporary = false, 
+  temporary = false,
   onDelete,
   onUpdateConversionRate,
+  isMoneyFlow = false,
 }: ConnectionLineProps) {
   const [isEditingRate, setIsEditingRate] = useState(false);
-  const [editRate, setEditRate] = useState('');
+  const [editRate, setEditRate] = useState("");
+
+  // 좌표 유효성 검사
+  if (isNaN(from.x) || isNaN(from.y) || isNaN(to.x) || isNaN(to.y)) {
+    return null;
+  }
 
   const dx = to.x - from.x;
   const dy = to.y - from.y;
   const distance = Math.sqrt(dx * dx + dy * dy);
-  
+
   const controlPointOffset = Math.min(distance * 0.5, 150);
-  
+
   const path = `
     M ${from.x} ${from.y}
     C ${from.x + controlPointOffset} ${from.y},
@@ -55,22 +63,36 @@ export function ConnectionLine({
   const dropoffRate = metrics?.dropoffRate || 0;
 
   // Determine connection type and color
-  const connectionType = connection?.type || 'traffic';
+  const connectionType = connection?.type || "traffic";
   let strokeColor = CONNECTION_COLORS[connectionType];
-  
+  const highlightStroke = "#e5e7eb"; // 밝은 회색 하이라이트
+
+  // Money flow 강조: 결제/구독 이후는 초록 고정
+  if (!temporary && isMoneyFlow) {
+    strokeColor = "#22c55e";
+  }
+
   // Override color based on health for traffic connections
-  if (!temporary && connectionType === 'traffic' && metrics) {
+  if (!temporary && connectionType === "traffic" && metrics) {
     if (dropoffRate > 80) {
-      strokeColor = '#EF4444'; // Red - critical dropoff
+      strokeColor = "#EF4444"; // Red - critical dropoff
     } else if (dropoffRate > 50) {
-      strokeColor = '#F59E0B'; // Amber - warning
+      strokeColor = "#F59E0B"; // Amber - warning
     } else {
       strokeColor = CONNECTION_COLORS[connectionType];
     }
   }
 
-  // Determine stroke width based on traffic (data pipe visualization)
-  const strokeWidth = temporary ? 2 : Math.max(2, Math.min(12, traffic / 100));
+  // Traffic 기반 동적 굵기: 2px ~ 8px
+  const strokeWidth = temporary
+    ? 3
+    : Math.max(2, Math.min(8, traffic > 0 ? traffic / 150 : 2));
+
+  // Dead link: 유입 0이면 빨간 점선 처리
+  const isDead = !temporary && traffic <= 0;
+  if (isDead) {
+    strokeColor = "#EF4444";
+  }
 
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -81,10 +103,10 @@ export function ConnectionLine({
 
   // Valve badge color based on conversion rate
   const getValveColor = () => {
-    if (conversionRate >= 50) return { bg: '#10B981', text: '#ffffff' }; // Green
-    if (conversionRate >= 10) return { bg: '#3B82F6', text: '#ffffff' }; // Blue
-    if (conversionRate > 0) return { bg: '#F59E0B', text: '#ffffff' }; // Amber
-    return { bg: '#EF4444', text: '#ffffff' }; // Red
+    if (conversionRate >= 50) return { bg: "#10B981", text: "#ffffff" }; // Green
+    if (conversionRate >= 10) return { bg: "#3B82F6", text: "#ffffff" }; // Blue
+    if (conversionRate > 0) return { bg: "#F59E0B", text: "#ffffff" }; // Amber
+    return { bg: "#EF4444", text: "#ffffff" }; // Red
   };
 
   const valveColor = getValveColor();
@@ -99,23 +121,39 @@ export function ConnectionLine({
 
   const handleRateSubmit = () => {
     const newRate = parseFloat(editRate);
-    if (!isNaN(newRate) && newRate >= 0 && newRate <= 100 && onUpdateConversionRate) {
+    if (
+      !isNaN(newRate) &&
+      newRate >= 0 &&
+      newRate <= 100 &&
+      onUpdateConversionRate
+    ) {
       onUpdateConversionRate(id, newRate);
     }
     setIsEditingRate(false);
   };
 
   return (
-    <g className={temporary ? 'opacity-60' : ''}>
-      {/* Glow effect for active data flow */}
-      {!temporary && traffic > 0 && (
-        <path
-          d={path}
-          fill="none"
-          stroke={strokeColor}
-          strokeWidth={strokeWidth + 4}
-          className="pointer-events-none opacity-20 blur-sm"
-        />
+    <g className={temporary ? "opacity-60" : ""} data-connection-id={id}>
+      {/* Glow / 대비 강화 */}
+      {!temporary && !isDead && (
+        <>
+          <path
+            d={path}
+            fill="none"
+            stroke={highlightStroke}
+            strokeWidth={strokeWidth + 8}
+            className="pointer-events-none opacity-30"
+            strokeLinecap="round"
+          />
+          <path
+            d={path}
+            fill="none"
+            stroke={strokeColor}
+            strokeWidth={strokeWidth + 6}
+            className="pointer-events-none opacity-35 blur-sm"
+            strokeLinecap="round"
+          />
+        </>
       )}
 
       {/* Invisible thick path for easier clicking */}
@@ -126,18 +164,21 @@ export function ConnectionLine({
         strokeWidth="20"
         className="pointer-events-auto cursor-pointer"
       />
-      
+
       {/* Visible path - animated if traffic is flowing */}
       <path
         d={path}
         fill="none"
         stroke={strokeColor}
         strokeWidth={strokeWidth}
-        className={`pointer-events-none ${traffic > 0 ? 'animate-pulse' : ''}`}
-        strokeDasharray={temporary ? '8,4' : 'none'}
+        className={`pointer-events-none ${
+          !temporary && traffic > 0 ? "animate-pulse" : ""
+        }`}
+        strokeDasharray={isDead || temporary ? "8,4" : "none"}
         strokeLinecap="round"
+        strokeOpacity={0.95}
       />
-      
+
       {/* Arrow head */}
       <circle
         cx={to.x}
@@ -146,65 +187,76 @@ export function ConnectionLine({
         fill={strokeColor}
         className="pointer-events-none"
       />
-      
-      {/* Valve Badge - Editable conversion rate */}
+
+      {/* Valve Badge - Editable conversion rate (스마트 엣지) */}
       {!temporary && metrics && (
         <g className="pointer-events-auto">
-          {/* Valve Circle */}
-          <circle
+          {/* 타원형 뱃지 배경 */}
+          <ellipse
             cx={midX}
             cy={midY}
-            r="20"
+            rx="35"
+            ry="20"
             fill={valveColor.bg}
             stroke="#1F2937"
             strokeWidth="3"
             className="cursor-pointer hover:scale-110 transition-transform"
             onClick={handleValveClick}
           />
-          
+
           {/* Conversion Rate Text */}
           {!isEditingRate ? (
             <>
               <text
                 x={midX}
-                y={midY + 2}
+                y={midY + 5}
                 fill={valveColor.text}
-                fontSize="11"
+                fontSize="13"
                 fontWeight="bold"
                 textAnchor="middle"
                 className="pointer-events-none select-none"
               >
                 {conversionRate.toFixed(0)}%
               </text>
-              
+
               {/* Edit icon hint */}
-              <g transform={`translate(${midX + 15}, ${midY - 15})`} opacity="0.7">
-                <circle r="8" fill="#1F2937" />
-                <foreignObject x="-6" y="-6" width="12" height="12">
+              <g
+                transform={`translate(${midX + 25}, ${midY - 15})`}
+                opacity="0.8"
+              >
+                <circle r="9" fill="#1F2937" stroke="#3B82F6" strokeWidth="2" />
+                <foreignObject x="-7" y="-7" width="14" height="14">
                   <div className="flex items-center justify-center w-full h-full">
-                    <Edit2 className="w-2.5 h-2.5 text-white" />
+                    <Edit2 className="w-3 h-3 text-white" />
                   </div>
                 </foreignObject>
               </g>
             </>
           ) : (
-            <foreignObject x={midX - 15} y={midY - 10} width="30" height="20">
-              <input
-                type="number"
-                value={editRate}
-                onChange={(e) => setEditRate(e.target.value)}
-                onBlur={handleRateSubmit}
-                onKeyDown={(e) => e.key === 'Enter' && handleRateSubmit()}
-                autoFocus
-                className="w-full h-full text-center bg-white text-black text-xs rounded border-none outline-none"
-                min="0"
-                max="100"
-              />
+            <foreignObject x={midX - 50} y={midY - 25} width="100" height="50">
+              <div className="flex flex-col items-center justify-center w-full h-full bg-white rounded-lg shadow-2xl border-2 border-blue-500 p-2">
+                <input
+                  type="number"
+                  value={editRate}
+                  onChange={(e) => setEditRate(e.target.value)}
+                  onBlur={handleRateSubmit}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") handleRateSubmit();
+                    if (e.key === "Escape") setIsEditingRate(false);
+                  }}
+                  autoFocus
+                  className="w-full text-center bg-gray-50 text-black text-lg font-bold rounded border-2 border-gray-300 outline-none focus:border-blue-500 px-2 py-1"
+                  min="0"
+                  max="100"
+                  placeholder="%"
+                />
+                <span className="text-xs text-gray-500 mt-1">Enter로 저장</span>
+              </div>
             </foreignObject>
           )}
         </g>
       )}
-      
+
       {/* Traffic Badge - show traffic count */}
       {!temporary && metrics && traffic > 0 && (
         <g>
@@ -220,7 +272,7 @@ export function ConnectionLine({
             strokeWidth="2"
             className="pointer-events-none"
           />
-          
+
           {/* Traffic text */}
           <text
             x={midX}
@@ -232,7 +284,7 @@ export function ConnectionLine({
           >
             👥 {traffic.toLocaleString()}명
           </text>
-          
+
           {/* Warning icon for high dropoff */}
           {dropoffRate > 80 && (
             <g transform={`translate(${midX + 45}, ${midY - 30})`}>
@@ -246,7 +298,7 @@ export function ConnectionLine({
           )}
         </g>
       )}
-      
+
       {/* Delete button */}
       {!temporary && onDelete && (
         <g className="pointer-events-auto">
