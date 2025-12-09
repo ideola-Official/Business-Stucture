@@ -1,0 +1,76 @@
+.header {
+  height: 3.5rem; /* h-14 */
+  background-color: #171717; /* neutral-900 */
+  border-bottom: 1px solid #262626; /* neutral-800 */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1.5rem; /* px-6 */
+}
+
+.left {
+  display: flex;
+  align-items: center;
+  gap: 1rem; /* gap-4 */
+}
+
+.title {
+  color: #ffffff;
+  letter-spacing: -0.025em; /* tracking-tight */
+  font-weight: 600;
+}
+
+.subtitle {
+  color: #737373; /* neutral-500 */
+  font-size: 0.875rem; /* text-sm */
+  line-height: 1.25rem;
+}
+
+.right {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem; /* gap-6 */
+}
+
+.stats {
+  display: flex;
+  align-items: center;
+  gap: 1rem; /* gap-4 */
+  color: #a3a3a3; /* neutral-400 */
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem; /* gap-2 */
+}
+
+.primaryButton {
+  padding: 0.5rem 1rem; /* py-2 px-4 */
+  background-color: #2563eb; /* blue-600 */
+  color: #ffffff;
+  border-radius: 0.25rem; /* rounded */
+  display: flex;
+  align-items: center;
+  gap: 0.5rem; /* gap-2 */
+  transition: background-color 150ms ease, color 150ms ease;
+}
+
+.primaryButton:hover {
+  background-color: #1d4ed8; /* blue-700 */
+}
+
+.iconButton {
+  padding: 0.5rem; /* p-2 */
+  color: #a3a3a3; /* neutral-400 */
+  border-radius: 0.25rem;
+  transition: background-color 150ms ease, color 150ms ease;
+}
+
+.iconButton:hover {
+  color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.04);
+}
+
