@@ -507,6 +507,7 @@ export function Inspector({ selectedNode, onUpdateNode }: InspectorProps) {
           </>
         );
 
+      case "one-time":
       case "payment":
         const margin = selectedNode.data.price - selectedNode.data.cogs;
         const marginRate =
@@ -637,6 +638,332 @@ export function Inspector({ selectedNode, onUpdateNode }: InspectorProps) {
                   {typeof ltv === "string" ? ltv : Number(ltv).toLocaleString()}
                 </p>
               </div>
+            </div>
+          </>
+        );
+
+      case "commission":
+        return (
+          <>
+            <FormField
+              label="수수료 명칭"
+              value={selectedNode.data.name}
+              onChange={(v) => handleChange("name", v)}
+            />
+            <div className="pt-4 border-t border-neutral-800 space-y-3">
+              <FormField
+                label="거래당 금액 (원)"
+                type="number"
+                value={selectedNode.data.transactionAmount}
+                onChange={(v) => handleChange("transactionAmount", Number(v))}
+              />
+              <SliderField
+                label="수수료율 (%)"
+                value={selectedNode.data.commissionRate}
+                onChange={(v) => handleChange("commissionRate", v)}
+                min={1}
+                max={50}
+                step={0.5}
+              />
+              <FormField
+                label="유저당 월평균 거래 수"
+                type="number"
+                value={selectedNode.data.volumePerUser}
+                onChange={(v) => handleChange("volumePerUser", Number(v))}
+              />
+            </div>
+          </>
+        );
+
+      case "upsell":
+        return (
+          <>
+            <FormField
+              label="업셀 상품명"
+              value={selectedNode.data.name}
+              onChange={(v) => handleChange("name", v)}
+            />
+            <div className="pt-4 border-t border-neutral-800 space-y-3">
+              <FormField
+                label="기본 가격 (원)"
+                type="number"
+                value={selectedNode.data.basePrice}
+                onChange={(v) => handleChange("basePrice", Number(v))}
+              />
+              <FormField
+                label="업셀 가격 (원)"
+                type="number"
+                value={selectedNode.data.upsellPrice}
+                onChange={(v) => handleChange("upsellPrice", Number(v))}
+                hint={`추가 수익: ₩${(selectedNode.data.upsellPrice - selectedNode.data.basePrice).toLocaleString()}`}
+              />
+              <SliderField
+                label="업셀 전환율 (%)"
+                value={selectedNode.data.upsellRate}
+                onChange={(v) => handleChange("upsellRate", v)}
+                min={0}
+                max={50}
+                step={0.5}
+              />
+            </div>
+          </>
+        );
+
+      case "ads-revenue":
+        return (
+          <>
+            <FormField
+              label="광고 수익 명칭"
+              value={selectedNode.data.name}
+              onChange={(v) => handleChange("name", v)}
+            />
+            <div className="pt-4 border-t border-neutral-800 space-y-3">
+              <FormField
+                label="CPM (원)"
+                type="number"
+                value={selectedNode.data.cpm}
+                onChange={(v) => handleChange("cpm", Number(v))}
+                hint="1000회 노출당 수익"
+              />
+              <FormField
+                label="유저당 월평균 노출 수"
+                type="number"
+                value={selectedNode.data.impressionsPerUser}
+                onChange={(v) => handleChange("impressionsPerUser", Number(v))}
+              />
+            </div>
+          </>
+        );
+
+      case "lead-magnet":
+        return (
+          <>
+            <FormField
+              label="리드 마그넷 명칭"
+              value={selectedNode.data.name}
+              onChange={(v) => handleChange("name", v)}
+            />
+            <div className="pt-4 border-t border-neutral-800 space-y-3">
+              <FormField
+                label="제공 유형"
+                value={selectedNode.data.offerType}
+                onChange={(v) => handleChange("offerType", v)}
+                placeholder="예: ebook, 체크리스트, 무료 상담"
+              />
+              <SliderField
+                label="전환율 (%)"
+                value={selectedNode.data.conversionRate}
+                onChange={(v) => handleChange("conversionRate", v)}
+                min={0.1}
+                max={100}
+                step={0.5}
+              />
+              <FormField
+                label="제작 비용 (원)"
+                type="number"
+                value={selectedNode.data.productionCost}
+                onChange={(v) => handleChange("productionCost", Number(v))}
+              />
+            </div>
+          </>
+        );
+
+      case "cart":
+        return (
+          <>
+            <FormField
+              label="장바구니 명칭"
+              value={selectedNode.data.name}
+              onChange={(v) => handleChange("name", v)}
+            />
+            <div className="pt-4 border-t border-neutral-800 space-y-3">
+              <SliderField
+                label="결제 전환율 (%)"
+                value={selectedNode.data.conversionRate}
+                onChange={(v) => handleChange("conversionRate", v)}
+                min={0.1}
+                max={100}
+                step={0.5}
+              />
+              <SliderField
+                label="장바구니 이탈률 (%)"
+                value={selectedNode.data.abandonmentRate}
+                onChange={(v) => handleChange("abandonmentRate", v)}
+                min={0}
+                max={100}
+                step={1}
+                hint={`${100 - selectedNode.data.abandonmentRate}% 결제 완료`}
+              />
+            </div>
+          </>
+        );
+
+      case "trial":
+        return (
+          <>
+            <FormField
+              label="무료 체험 명칭"
+              value={selectedNode.data.name}
+              onChange={(v) => handleChange("name", v)}
+            />
+            <div className="pt-4 border-t border-neutral-800 space-y-3">
+              <FormField
+                label="체험 기간 (일)"
+                type="number"
+                value={selectedNode.data.trialDays}
+                onChange={(v) => handleChange("trialDays", Number(v))}
+              />
+              <SliderField
+                label="유료 전환율 (%)"
+                value={selectedNode.data.conversionRate}
+                onChange={(v) => handleChange("conversionRate", v)}
+                min={0.1}
+                max={100}
+                step={0.5}
+              />
+            </div>
+          </>
+        );
+
+      case "labor-cost":
+        return (
+          <>
+            <FormField
+              label="인건비 항목"
+              value={selectedNode.data.name}
+              onChange={(v) => handleChange("name", v)}
+            />
+            <div className="pt-4 border-t border-neutral-800 space-y-3">
+              <FormField
+                label="직원 수 (명)"
+                type="number"
+                value={selectedNode.data.employeeCount}
+                onChange={(v) => handleChange("employeeCount", Number(v))}
+              />
+              <FormField
+                label="평균 월급 (원)"
+                type="number"
+                value={selectedNode.data.avgSalary}
+                onChange={(v) => handleChange("avgSalary", Number(v))}
+                hint={`월 총 인건비: ₩${((selectedNode.data.employeeCount || 0) * (selectedNode.data.avgSalary || 0)).toLocaleString()}`}
+              />
+            </div>
+          </>
+        );
+
+      case "infra-cost":
+        return (
+          <>
+            <FormField
+              label="인프라 항목"
+              value={selectedNode.data.name}
+              onChange={(v) => handleChange("name", v)}
+            />
+            <div className="pt-4 border-t border-neutral-800 space-y-3">
+              <FormField
+                label="고정 비용 (원/월)"
+                type="number"
+                value={selectedNode.data.fixedCost}
+                onChange={(v) => handleChange("fixedCost", Number(v))}
+                hint="서버, SaaS 구독료 등"
+              />
+              <FormField
+                label="유저당 변동 비용 (원)"
+                type="number"
+                value={selectedNode.data.costPerUser}
+                onChange={(v) => handleChange("costPerUser", Number(v))}
+                hint="트래픽, 스토리지 등"
+              />
+            </div>
+          </>
+        );
+
+      case "refund":
+        return (
+          <>
+            <FormField
+              label="환불 항목"
+              value={selectedNode.data.name}
+              onChange={(v) => handleChange("name", v)}
+            />
+            <div className="pt-4 border-t border-neutral-800 space-y-3">
+              <SliderField
+                label="환불률 (%)"
+                value={selectedNode.data.refundRate}
+                onChange={(v) => handleChange("refundRate", v)}
+                min={0}
+                max={30}
+                step={0.5}
+              />
+              <FormField
+                label="환불 처리 비용 (건당, 원)"
+                type="number"
+                value={selectedNode.data.processingCost}
+                onChange={(v) => handleChange("processingCost", Number(v))}
+              />
+            </div>
+          </>
+        );
+
+      case "marketing-fee":
+        return (
+          <>
+            <FormField
+              label="마케팅 수수료 항목"
+              value={selectedNode.data.name}
+              onChange={(v) => handleChange("name", v)}
+            />
+            <div className="pt-4 border-t border-neutral-800 space-y-3">
+              <SliderField
+                label="대행 수수료율 (%)"
+                value={selectedNode.data.agencyFee}
+                onChange={(v) => handleChange("agencyFee", v)}
+                min={0}
+                max={50}
+                step={1}
+              />
+              <FormField
+                label="초기 셋업 비용 (원)"
+                type="number"
+                value={selectedNode.data.setupCost}
+                onChange={(v) => handleChange("setupCost", Number(v))}
+              />
+            </div>
+          </>
+        );
+
+      case "retention":
+        return (
+          <>
+            <FormField
+              label="재방문 캠페인명"
+              value={selectedNode.data.name}
+              onChange={(v) => handleChange("name", v)}
+            />
+            <div className="pt-4 border-t border-neutral-800 space-y-3">
+              <SliderField
+                label="타겟 재방문율 (%)"
+                value={selectedNode.data.targetRate}
+                onChange={(v) => handleChange("targetRate", v)}
+                min={0}
+                max={100}
+                step={1}
+              />
+              <FormField
+                label="유저당 비용 (원)"
+                type="number"
+                value={selectedNode.data.costPerUser}
+                onChange={(v) => handleChange("costPerUser", Number(v))}
+                hint="리타겟팅 광고, 쿠폰 등"
+              />
+              <SliderField
+                label="재전환율 (%)"
+                value={selectedNode.data.conversionRate}
+                onChange={(v) => handleChange("conversionRate", v)}
+                min={0}
+                max={50}
+                step={0.5}
+              />
             </div>
           </>
         );

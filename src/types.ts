@@ -46,6 +46,45 @@ export interface SimulationParams {
   baseConversionRate: number;
 }
 
+export interface CostBreakdown {
+  marketing: {
+    paidAds: number;
+    seo: number;
+    email: number;
+    referral: number;
+  };
+  operations: {
+    labor: number;
+    infrastructure: number;
+    consultation: number;
+  };
+  other: {
+    refunds: number;
+    fees: number;
+  };
+}
+
+export interface RevenueBreakdown {
+  products: {
+    oneTime: number;
+    oneTimeCustomers: number;
+  };
+  recurring: {
+    subscription: number;
+    subscriptionCustomers: number;
+  };
+  platforms: {
+    commission: number;
+    commissionCustomers: number;
+  };
+  additional: {
+    upsell: number;
+    upsellCustomers: number;
+    adsRevenue: number;
+    adsUsers: number;
+  };
+}
+
 export interface SimulationResult {
   totalRevenue: number;
   totalCost: number;
@@ -57,4 +96,6 @@ export interface SimulationResult {
     users: number;
     dropoff: number;
   }[];
+  costBreakdown: CostBreakdown;
+  revenueBreakdown: RevenueBreakdown;
 }

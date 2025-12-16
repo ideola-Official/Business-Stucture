@@ -1,4 +1,4 @@
-import { Node, Connection, SimulationResult } from '../types';
+import { Node, Connection, SimulationResult, CostBreakdown, RevenueBreakdown } from '../types';
 
 export function runSimulation(
   nodes: Node[],
@@ -129,14 +129,21 @@ export function runSimulation(
     });
   });
 
-  // Calculate revenue with detailed business logic
+  // ===== 상세 매출 계산 (Revenue Breakdown) =====
   let totalRevenue = 0;
   let totalMargin = 0;
+  
+  const revenueBreakdown: RevenueBreakdown = {
+    products: { oneTime: 0, oneTimeCustomers: 0 },
+    recurring: { subscription: 0, subscriptionCustomers: 0 },
+    platforms: { commission: 0, commissionCustomers: 0 },
+    additional: { upsell: 0, upsellCustomers: 0, adsRevenue: 0, adsUsers: 0 },
+  };
   
   paymentNodes.forEach(paymentNode => {
     const traffic = trafficMap.get(paymentNode.id) || 0;
     
-    if (paymentNode.type === 'payment') {
+    if (paymentNode.type === 'one-time') {
       const { price, cogs, fee, repurchaseRate } = paymentNode.data;
       
       // Initial purchase revenue
@@ -148,6 +155,9 @@ export function runSimulation(
       totalRevenue += grossRevenue;
       totalMargin += netRevenue;
       
+      revenueBreakdown.products.oneTime += grossRevenue;
+      revenueBreakdown.products.oneTimeCustomers += traffic;
+      
       // Add repurchase revenue (next month)
       if (repurchaseRate > 0) {
         const repurchasers = Math.floor(traffic * (repurchaseRate / 100));
@@ -157,6 +167,8 @@ export function runSimulation(
         
         totalRevenue += repurchaseRevenue;
         totalMargin += (repurchaseRevenue - repurchaseCost - repurchaseFee);
+        
+        revenueBreakdown.products.oneTime += repurchaseRevenue;
       }
       
     } else if (paymentNode.type === 'subscription') {
@@ -169,29 +181,154 @@ export function runSimulation(
       const ltv = monthlyPrice * avgLifetimeMonths;
       const totalCost = cogs * avgLifetimeMonths;
       
-      // Apply free trial delay
-      const firstMonthRevenue = freeTrialDays > 0 ? 0 : monthlyPrice;
-      
       // Calculate total revenue from all subscribers
       const subscriptionRevenue = traffic * ltv;
       const subscriptionCost = traffic * totalCost;
       
       totalRevenue += subscriptionRevenue;
       totalMargin += (subscriptionRevenue - subscriptionCost);
+      
+      revenueBreakdown.recurring.subscription += subscriptionRevenue;
+      revenueBreakdown.recurring.subscriptionCustomers += traffic;
+      
+    } else if (paymentNode.type === 'commission') {
+      const { transactionAmount, commissionRate, volumePerUser } = paymentNode.data;
+      
+      const commissionsRevenue = traffic * transactionAmount * (commissionRate / 100) * volumePerUser;
+      totalRevenue += commissionsRevenue;
+      totalMargin += commissionsRevenue;
+      
+      revenueBreakdown.platforms.commission += commissionsRevenue;
+      revenueBreakdown.platforms.commissionCustomers += traffic;
+      
+    } else if (paymentNode.type === 'upsell') {
+      const { basePrice, upsellPrice, upsellRate } = paymentNode.data;
+      
+      const upsellConversions = Math.floor(traffic * (upsellRate / 100));
+      const upsellRevenue = upsellConversions * (upsellPrice - basePrice);
+      totalRevenue += upsellRevenue;
+      totalMargin += upsellRevenue;
+      
+      revenueBreakdown.additional.upsell += upsellRevenue;
+      revenueBreakdown.additional.upsellCustomers += upsellConversions;
+      
+    } else if (paymentNode.type === 'ads-revenue') {
+      const { cpm, impressionsPerUser } = paymentNode.data;
+      
+      const adsRevenue = traffic * impressionsPerUser * (cpm / 1000);
+      totalRevenue += adsRevenue;
+      totalMargin += adsRevenue;
+      
+      revenueBreakdown.additional.adsRevenue += adsRevenue;
+      revenueBreakdown.additional.adsUsers += traffic;
     }
   });
 
-  const totalCost = dailyAdSpend * 30; // Monthly marketing cost
+  // ===== 상세 비용 계산 (Cost Breakdown) =====
+  const costBreakdown: CostBreakdown = {
+    marketing: { paidAds: 0, seo: 0, email: 0, referral: 0 },
+    operations: { labor: 0, infrastructure: 0, consultation: 0 },
+    other: { refunds: 0, fees: 0 },
+  };
+
+  nodes.forEach(node => {
+    const nodeTraffic = trafficMap.get(node.id) || 0;
+    
+    switch (node.type) {
+      // 마케팅 비용
+      case 'paid-ads':
+        if (node.data.campaignOn) {
+          costBreakdown.marketing.paidAds += (node.data.dailyBudget || 0) * 30;
+        }
+        break;
+        
+      case 'seo-content':
+        costBreakdown.marketing.seo += (node.data.contentCount || 0) * (node.data.costPerContent || 0);
+        break;
+        
+      case 'email-campaign':
+        costBreakdown.marketing.email += node.data.sendCost || 0;
+        break;
+        
+      case 'referral':
+        // 초대 보상 비용 (초대받은 사용자 수 * 보상금)
+        costBreakdown.marketing.referral += nodeTraffic * (node.data.rewardCost || 0);
+        break;
+        
+      // 운영 비용
+      case 'labor-cost':
+        costBreakdown.operations.labor += (node.data.employeeCount || 0) * (node.data.avgSalary || 0);
+        break;
+        
+      case 'infra-cost':
+        const fixedCost = node.data.fixedCost || 0;
+        const variableCost = nodeTraffic * (node.data.costPerUser || 0);
+        costBreakdown.operations.infrastructure += fixedCost + variableCost;
+        break;
+        
+      case 'consultation':
+        if (nodeTraffic > 0) {
+          const avgTimeMinutes = node.data.avgTimeMinutes || 30;
+          const costPerHour = node.data.costPerHour || 0;
+          const consultationCost = nodeTraffic * (avgTimeMinutes / 60) * costPerHour;
+          costBreakdown.operations.consultation += consultationCost;
+        }
+        break;
+        
+      // 기타 비용
+      case 'refund':
+        const refundRate = (node.data.refundRate || 0) / 100;
+        const processingCost = node.data.processingCost || 0;
+        const refundAmount = totalRevenue * refundRate;
+        const refundProcessing = nodeTraffic * processingCost;
+        costBreakdown.other.refunds += refundAmount + refundProcessing;
+        break;
+        
+      case 'marketing-fee':
+        const agencyFee = totalRevenue * ((node.data.agencyFee || 0) / 100);
+        const setupCost = node.data.setupCost || 0;
+        costBreakdown.other.fees += agencyFee + setupCost;
+        break;
+        
+      case 'retention':
+        if (nodeTraffic > 0) {
+          const retentionCost = nodeTraffic * (node.data.costPerUser || 0);
+          costBreakdown.marketing.referral += retentionCost; // retention을 referral에 합산
+        }
+        break;
+    }
+  });
+
+  // 총 비용 계산
+  const totalCost = 
+    costBreakdown.marketing.paidAds +
+    costBreakdown.marketing.seo +
+    costBreakdown.marketing.email +
+    costBreakdown.marketing.referral +
+    costBreakdown.operations.labor +
+    costBreakdown.operations.infrastructure +
+    costBreakdown.operations.consultation +
+    costBreakdown.other.refunds +
+    costBreakdown.other.fees;
+
   const netProfit = totalMargin - totalCost;
   const roi = totalCost > 0 ? ((netProfit / totalCost) * 100) : 0;
+
+  // projectedUsers 계산 (최종 고객 수)
+  let projectedUsers = 0;
+  paymentNodes.forEach(node => {
+    projectedUsers += trafficMap.get(node.id) || 0;
+  });
 
   return {
     totalRevenue,
     totalCost,
     netProfit,
     roi,
-    projectedUsers: currentTraffic,
+    projectedUsers,
     conversionFunnel: funnel,
+    costBreakdown,
+    revenueBreakdown,
   };
 }
 

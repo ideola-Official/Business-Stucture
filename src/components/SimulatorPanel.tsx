@@ -1,5 +1,5 @@
-import React from 'react';
-import { TrendingUp, TrendingDown, DollarSign, Users, AlertTriangle, Lightbulb, Zap, Target } from 'lucide-react';
+import React, { useState } from 'react';
+import { TrendingUp, TrendingDown, DollarSign, Users, AlertTriangle, Lightbulb, Zap, Target, ChevronDown, ChevronUp, Megaphone, Server, UserCheck, XCircle, Package, Repeat, Percent, Gift } from 'lucide-react';
 import { SimulationResult, DiagnosticMessage } from '../types';
 import { Slider } from './ui/slider';
 
@@ -18,6 +18,10 @@ export function SimulatorPanel({
   onBudgetChange,
   isSimulating,
 }: SimulatorPanelProps) {
+  const [showCostBreakdown, setShowCostBreakdown] = useState(false);
+  const [showRevenueBreakdown, setShowRevenueBreakdown] = useState(false);
+  const [showCustomerBreakdown, setShowCustomerBreakdown] = useState(false);
+  
   const hasErrors = diagnostics.some(d => d.type === 'error');
   const hasWarnings = diagnostics.some(d => d.type === 'warning');
   
@@ -104,89 +108,390 @@ export function SimulatorPanel({
               </div>
             </div>
             
-            <div className="grid grid-cols-5 gap-4 flex-1">
-              {/* Revenue Card */}
-              <div className="bg-neutral-800 rounded-xl p-4 border border-neutral-700 hover:border-blue-500 transition-all">
-                <div className="flex items-center gap-2 text-neutral-400 text-xs mb-2">
-                  <DollarSign className="w-4 h-4" />
-                  <span>매출</span>
-                </div>
-                <p className="text-2xl text-blue-400 mb-1">
-                  ₩{(simulationResult.totalRevenue / 10000).toFixed(0)}만
-                </p>
-                <p className="text-xs text-neutral-500">
-                  {simulationResult.totalRevenue.toLocaleString()}원
-                </p>
-              </div>
-
-              {/* Users Card */}
-              <div className="bg-neutral-800 rounded-xl p-4 border border-neutral-700 hover:border-purple-500 transition-all">
-                <div className="flex items-center gap-2 text-neutral-400 text-xs mb-2">
-                  <Users className="w-4 h-4" />
-                  <span>전환 고객</span>
-                </div>
-                <p className="text-2xl text-purple-400 mb-1">
-                  {simulationResult.projectedUsers.toLocaleString()}
-                </p>
-                <p className="text-xs text-neutral-500">명</p>
-              </div>
-
-              {/* Cost Card */}
-              <div className="bg-neutral-800 rounded-xl p-4 border border-neutral-700 hover:border-orange-500 transition-all">
-                <div className="flex items-center gap-2 text-neutral-400 text-xs mb-2">
-                  <Target className="w-4 h-4" />
-                  <span>총 비용</span>
-                </div>
-                <p className="text-2xl text-orange-400 mb-1">
-                  ₩{(simulationResult.totalCost / 10000).toFixed(0)}만
-                </p>
-                <p className="text-xs text-neutral-500">
-                  {simulationResult.totalCost.toLocaleString()}원
-                </p>
-              </div>
-
-              {/* NET PROFIT - HERO CARD (2x size) */}
-              <div className={`
-                col-span-2 rounded-2xl p-6 border-2 transition-all
-                ${isProfit 
-                  ? 'bg-gradient-to-br from-green-950/50 to-green-900/30 border-green-500 shadow-xl shadow-green-500/20' 
-                  : 'bg-gradient-to-br from-red-950/50 to-red-900/30 border-red-500 shadow-xl shadow-red-500/20'
-                }
-              `}>
-                <div className="flex flex-col items-center justify-center h-full">
-                  <div className="flex items-center gap-3 mb-3">
-                    {isProfit ? (
-                      <TrendingUp className="w-6 h-6 text-green-400" />
+            <div className="space-y-4">
+              <div className="grid grid-cols-5 gap-4">
+                {/* Revenue Card - Clickable */}
+                <div 
+                  className="bg-neutral-800 rounded-xl p-4 border border-neutral-700 hover:border-blue-500 transition-all cursor-pointer"
+                  onClick={() => setShowRevenueBreakdown(!showRevenueBreakdown)}
+                >
+                  <div className="flex items-center justify-between text-neutral-400 text-xs mb-2">
+                    <div className="flex items-center gap-2">
+                      <DollarSign className="w-4 h-4" />
+                      <span>매출</span>
+                    </div>
+                    {showRevenueBreakdown ? (
+                      <ChevronUp className="w-4 h-4" />
                     ) : (
-                      <TrendingDown className="w-6 h-6 text-red-400" />
+                      <ChevronDown className="w-4 h-4" />
                     )}
-                    <span className={`text-sm uppercase tracking-wider ${isProfit ? 'text-green-300' : 'text-red-300'}`}>
-                      순수익
-                    </span>
                   </div>
-                  
-                  <p className={`text-5xl font-black mb-2 ${isProfit ? 'text-green-400' : 'text-red-400'}`}>
-                    {isProfit ? '+' : ''}₩{Math.abs(simulationResult.netProfit / 10000).toFixed(0)}만
+                  <p className="text-2xl text-blue-400 mb-1">
+                    ₩{(simulationResult.totalRevenue / 10000).toFixed(0)}만
                   </p>
-                  
-                  <p className={`text-sm mb-4 ${isProfit ? 'text-green-300/70' : 'text-red-300/70'}`}>
-                    {simulationResult.netProfit.toLocaleString()}원
+                  <p className="text-xs text-neutral-500">
+                    {simulationResult.totalRevenue.toLocaleString()}원
                   </p>
-                  
-                  {/* ROI Badge */}
-                  <div className={`
-                    px-4 py-2 rounded-full font-bold text-lg
-                    ${roi > 100 
-                      ? 'bg-green-500 text-white' 
-                      : roi > 0 
-                        ? 'bg-yellow-500 text-black'
-                        : 'bg-red-500 text-white'
-                    }
-                  `}>
-                    ROI {roi.toFixed(0)}%
+                </div>
+
+                {/* Users Card - Clickable */}
+                <div 
+                  className="bg-neutral-800 rounded-xl p-4 border border-neutral-700 hover:border-purple-500 transition-all cursor-pointer"
+                  onClick={() => setShowCustomerBreakdown(!showCustomerBreakdown)}
+                >
+                  <div className="flex items-center justify-between text-neutral-400 text-xs mb-2">
+                    <div className="flex items-center gap-2">
+                      <Users className="w-4 h-4" />
+                      <span>전환 고객</span>
+                    </div>
+                    {showCustomerBreakdown ? (
+                      <ChevronUp className="w-4 h-4" />
+                    ) : (
+                      <ChevronDown className="w-4 h-4" />
+                    )}
+                  </div>
+                  <p className="text-2xl text-purple-400 mb-1">
+                    {simulationResult.projectedUsers.toLocaleString()}
+                  </p>
+                  <p className="text-xs text-neutral-500">명</p>
+                </div>
+
+                {/* Cost Card - Clickable */}
+                <div 
+                  className="bg-neutral-800 rounded-xl p-4 border border-neutral-700 hover:border-orange-500 transition-all cursor-pointer"
+                  onClick={() => setShowCostBreakdown(!showCostBreakdown)}
+                >
+                  <div className="flex items-center justify-between text-neutral-400 text-xs mb-2">
+                    <div className="flex items-center gap-2">
+                      <Target className="w-4 h-4" />
+                      <span>총 비용</span>
+                    </div>
+                    {showCostBreakdown ? (
+                      <ChevronUp className="w-4 h-4" />
+                    ) : (
+                      <ChevronDown className="w-4 h-4" />
+                    )}
+                  </div>
+                  <p className="text-2xl text-orange-400 mb-1">
+                    ₩{(simulationResult.totalCost / 10000).toFixed(0)}만
+                  </p>
+                  <p className="text-xs text-neutral-500">
+                    {simulationResult.totalCost.toLocaleString()}원
+                  </p>
+                </div>
+
+                {/* NET PROFIT - HERO CARD (2x size) */}
+                <div className={`
+                  col-span-2 rounded-2xl p-6 border-2 transition-all
+                  ${isProfit 
+                    ? 'bg-gradient-to-br from-green-950/50 to-green-900/30 border-green-500 shadow-xl shadow-green-500/20' 
+                    : 'bg-gradient-to-br from-red-950/50 to-red-900/30 border-red-500 shadow-xl shadow-red-500/20'
+                  }
+                `}>
+                  <div className="flex flex-col items-center justify-center h-full">
+                    <div className="flex items-center gap-3 mb-3">
+                      {isProfit ? (
+                        <TrendingUp className="w-6 h-6 text-green-400" />
+                      ) : (
+                        <TrendingDown className="w-6 h-6 text-red-400" />
+                      )}
+                      <span className={`text-sm uppercase tracking-wider ${isProfit ? 'text-green-300' : 'text-red-300'}`}>
+                        순수익
+                      </span>
+                    </div>
+                    
+                    <p className={`text-5xl font-black mb-2 ${isProfit ? 'text-green-400' : 'text-red-400'}`}>
+                      {isProfit ? '+' : ''}₩{Math.abs(simulationResult.netProfit / 10000).toFixed(0)}만
+                    </p>
+                    
+                    <p className={`text-sm mb-4 ${isProfit ? 'text-green-300/70' : 'text-red-300/70'}`}>
+                      {simulationResult.netProfit.toLocaleString()}원
+                    </p>
+                    
+                    {/* ROI Badge */}
+                    <div className={`
+                      px-4 py-2 rounded-full font-bold text-lg
+                      ${roi > 100 
+                        ? 'bg-green-500 text-white' 
+                        : roi > 0 
+                          ? 'bg-yellow-500 text-black'
+                          : 'bg-red-500 text-white'
+                      }
+                    `}>
+                      ROI {roi.toFixed(0)}%
+                    </div>
                   </div>
                 </div>
               </div>
+
+              {/* Revenue Breakdown - Expandable Section */}
+              {showRevenueBreakdown && simulationResult.revenueBreakdown && (
+                <div className="bg-neutral-800/50 rounded-xl p-4 border border-blue-900/50 animate-in slide-in-from-top-2">
+                  <h4 className="text-blue-400 text-sm font-bold mb-4 flex items-center gap-2">
+                    <DollarSign className="w-4 h-4" />
+                    매출 구조 상세 분석
+                  </h4>
+                  
+                  <div className="grid grid-cols-4 gap-4">
+                    {/* Product Sales */}
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2 text-blue-300 text-xs font-semibold mb-2">
+                        <Package className="w-3 h-3" />
+                        <span>상품 판매</span>
+                      </div>
+                      
+                      <RevenueItem 
+                        label="단건 판매" 
+                        amount={simulationResult.revenueBreakdown.products.oneTime}
+                        customers={simulationResult.revenueBreakdown.products.oneTimeCustomers}
+                      />
+                      
+                      <div className="pt-2 mt-2 border-t border-blue-900/30">
+                        <RevenueItem 
+                          label="소계" 
+                          amount={simulationResult.revenueBreakdown.products.oneTime}
+                          customers={simulationResult.revenueBreakdown.products.oneTimeCustomers}
+                          bold
+                        />
+                      </div>
+                    </div>
+
+                    {/* Recurring Revenue */}
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2 text-blue-300 text-xs font-semibold mb-2">
+                        <Repeat className="w-3 h-3" />
+                        <span>구독 수익</span>
+                      </div>
+                      
+                      <RevenueItem 
+                        label="정기 구독" 
+                        amount={simulationResult.revenueBreakdown.recurring.subscription}
+                        customers={simulationResult.revenueBreakdown.recurring.subscriptionCustomers}
+                      />
+                      
+                      <div className="pt-2 mt-2 border-t border-blue-900/30">
+                        <RevenueItem 
+                          label="소계" 
+                          amount={simulationResult.revenueBreakdown.recurring.subscription}
+                          customers={simulationResult.revenueBreakdown.recurring.subscriptionCustomers}
+                          bold
+                        />
+                      </div>
+                    </div>
+
+                    {/* Platform Revenue */}
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2 text-blue-300 text-xs font-semibold mb-2">
+                        <Percent className="w-3 h-3" />
+                        <span>플랫폼 수익</span>
+                      </div>
+                      
+                      <RevenueItem 
+                        label="중개 수수료" 
+                        amount={simulationResult.revenueBreakdown.platforms.commission}
+                        customers={simulationResult.revenueBreakdown.platforms.commissionCustomers}
+                      />
+                      
+                      <div className="pt-2 mt-2 border-t border-blue-900/30">
+                        <RevenueItem 
+                          label="소계" 
+                          amount={simulationResult.revenueBreakdown.platforms.commission}
+                          customers={simulationResult.revenueBreakdown.platforms.commissionCustomers}
+                          bold
+                        />
+                      </div>
+                    </div>
+
+                    {/* Additional Revenue */}
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2 text-blue-300 text-xs font-semibold mb-2">
+                        <Gift className="w-3 h-3" />
+                        <span>부가 수익</span>
+                      </div>
+                      
+                      <RevenueItem 
+                        label="업셀" 
+                        amount={simulationResult.revenueBreakdown.additional.upsell}
+                        customers={simulationResult.revenueBreakdown.additional.upsellCustomers}
+                      />
+                      <RevenueItem 
+                        label="광고 수익" 
+                        amount={simulationResult.revenueBreakdown.additional.adsRevenue}
+                        customers={simulationResult.revenueBreakdown.additional.adsUsers}
+                      />
+                      
+                      <div className="pt-2 mt-2 border-t border-blue-900/30">
+                        <RevenueItem 
+                          label="소계" 
+                          amount={
+                            simulationResult.revenueBreakdown.additional.upsell +
+                            simulationResult.revenueBreakdown.additional.adsRevenue
+                          }
+                          customers={
+                            simulationResult.revenueBreakdown.additional.upsellCustomers +
+                            simulationResult.revenueBreakdown.additional.adsUsers
+                          }
+                          bold
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Customer Breakdown - Expandable Section */}
+              {showCustomerBreakdown && simulationResult.conversionFunnel && (
+                <div className="bg-neutral-800/50 rounded-xl p-4 border border-purple-900/50 animate-in slide-in-from-top-2">
+                  <h4 className="text-purple-400 text-sm font-bold mb-4 flex items-center gap-2">
+                    <Users className="w-4 h-4" />
+                    전환 퍼널 상세 분석
+                  </h4>
+                  
+                  <div className="space-y-2">
+                    {simulationResult.conversionFunnel.map((stage, index) => (
+                      <div 
+                        key={index}
+                        className="flex items-center justify-between p-3 bg-neutral-900/50 rounded-lg border border-purple-900/30"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-full bg-purple-500/20 flex items-center justify-center text-purple-400 text-xs font-bold">
+                            {index + 1}
+                          </div>
+                          <div>
+                            <p className="text-neutral-300 text-sm font-medium">{stage.stage}</p>
+                            {stage.dropoff > 0 && (
+                              <p className="text-red-400 text-xs">
+                                -{stage.dropoff.toLocaleString()}명 이탈
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-purple-400 text-lg font-bold">
+                            {stage.users.toLocaleString()}명
+                          </p>
+                          {index > 0 && simulationResult.conversionFunnel[index - 1] && (
+                            <p className="text-neutral-500 text-xs">
+                              {((stage.users / simulationResult.conversionFunnel[index - 1].users) * 100).toFixed(1)}% 전환
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Cost Breakdown - Expandable Section */}
+              {showCostBreakdown && simulationResult.costBreakdown && (
+                <div className="bg-neutral-800/50 rounded-xl p-4 border border-orange-900/50 animate-in slide-in-from-top-2">
+                  <h4 className="text-orange-400 text-sm font-bold mb-4 flex items-center gap-2">
+                    <Target className="w-4 h-4" />
+                    비용 구조 상세 분석
+                  </h4>
+                  
+                  <div className="grid grid-cols-3 gap-4">
+                    {/* Marketing Costs */}
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2 text-orange-300 text-xs font-semibold mb-2">
+                        <Megaphone className="w-3 h-3" />
+                        <span>마케팅</span>
+                      </div>
+                      
+                      <CostItem 
+                        label="유료 광고" 
+                        amount={simulationResult.costBreakdown.marketing.paidAds} 
+                      />
+                      <CostItem 
+                        label="SEO/콘텐츠" 
+                        amount={simulationResult.costBreakdown.marketing.seo} 
+                      />
+                      <CostItem 
+                        label="이메일" 
+                        amount={simulationResult.costBreakdown.marketing.email} 
+                      />
+                      <CostItem 
+                        label="추천/재방문" 
+                        amount={simulationResult.costBreakdown.marketing.referral} 
+                      />
+                      
+                      <div className="pt-2 mt-2 border-t border-orange-900/30">
+                        <CostItem 
+                          label="소계" 
+                          amount={
+                            simulationResult.costBreakdown.marketing.paidAds +
+                            simulationResult.costBreakdown.marketing.seo +
+                            simulationResult.costBreakdown.marketing.email +
+                            simulationResult.costBreakdown.marketing.referral
+                          }
+                          bold
+                        />
+                      </div>
+                    </div>
+
+                    {/* Operations Costs */}
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2 text-orange-300 text-xs font-semibold mb-2">
+                        <Server className="w-3 h-3" />
+                        <span>운영</span>
+                      </div>
+                      
+                      <CostItem 
+                        label="인건비" 
+                        amount={simulationResult.costBreakdown.operations.labor} 
+                      />
+                      <CostItem 
+                        label="인프라" 
+                        amount={simulationResult.costBreakdown.operations.infrastructure} 
+                      />
+                      <CostItem 
+                        label="상담" 
+                        amount={simulationResult.costBreakdown.operations.consultation} 
+                      />
+                      
+                      <div className="pt-2 mt-2 border-t border-orange-900/30">
+                        <CostItem 
+                          label="소계" 
+                          amount={
+                            simulationResult.costBreakdown.operations.labor +
+                            simulationResult.costBreakdown.operations.infrastructure +
+                            simulationResult.costBreakdown.operations.consultation
+                          }
+                          bold
+                        />
+                      </div>
+                    </div>
+
+                    {/* Other Costs */}
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2 text-orange-300 text-xs font-semibold mb-2">
+                        <XCircle className="w-3 h-3" />
+                        <span>기타</span>
+                      </div>
+                      
+                      <CostItem 
+                        label="환불/취소" 
+                        amount={simulationResult.costBreakdown.other.refunds} 
+                      />
+                      <CostItem 
+                        label="수수료" 
+                        amount={simulationResult.costBreakdown.other.fees} 
+                      />
+                      
+                      <div className="pt-2 mt-2 border-t border-orange-900/30">
+                        <CostItem 
+                          label="소계" 
+                          amount={
+                            simulationResult.costBreakdown.other.refunds +
+                            simulationResult.costBreakdown.other.fees
+                          }
+                          bold
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         ) : (
@@ -252,6 +557,56 @@ export function SimulatorPanel({
           )}
         </div>
       </div>
+    </div>
+  );
+}
+
+// Helper component for revenue items
+interface RevenueItemProps {
+  label: string;
+  amount: number;
+  customers: number;
+  bold?: boolean;
+}
+
+function RevenueItem({ label, amount, customers, bold = false }: RevenueItemProps) {
+  if (amount === 0) return null;
+  
+  return (
+    <div className="space-y-1">
+      <div className="flex items-center justify-between text-xs">
+        <span className={`text-neutral-400 ${bold ? 'font-semibold' : ''}`}>{label}</span>
+        <span className={`text-blue-300 ${bold ? 'font-bold' : ''}`}>
+          ₩{(amount / 10000).toFixed(1)}만
+        </span>
+      </div>
+      {customers > 0 && (
+        <div className="flex justify-end">
+          <span className="text-purple-400 text-xs">
+            {customers.toLocaleString()}명
+          </span>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Helper component for cost items
+interface CostItemProps {
+  label: string;
+  amount: number;
+  bold?: boolean;
+}
+
+function CostItem({ label, amount, bold = false }: CostItemProps) {
+  if (amount === 0) return null;
+  
+  return (
+    <div className="flex items-center justify-between text-xs">
+      <span className={`text-neutral-400 ${bold ? 'font-semibold' : ''}`}>{label}</span>
+      <span className={`text-orange-300 ${bold ? 'font-bold' : ''}`}>
+        ₩{(amount / 10000).toFixed(1)}만
+      </span>
     </div>
   );
 }
