@@ -60,12 +60,12 @@ export function ConnectionLine({
 
   // Determine color based on connection type
   const getColor = () => {
-    if (temporary) return "#60A5FA"; // blue-400
-    if (!connection) return "#60A5FA";
+    if (temporary) return "#3B82F6"; // Electric Blue
+    if (!connection) return "#3B82F6";
 
     switch (connection.type) {
       case "traffic":
-        return "#60A5FA"; // blue-400
+        return "#3B82F6"; // Electric Blue
       case "money":
         return "#10B981"; // green-500
       case "cost":
@@ -73,7 +73,7 @@ export function ConnectionLine({
       case "data":
         return "#8B5CF6"; // purple-500
       default:
-        return "#60A5FA";
+        return "#3B82F6";
     }
   };
 

@@ -49,28 +49,33 @@
 
 .primaryButton {
   padding: 0.5rem 1rem; /* py-2 px-4 */
-  background-color: #2563eb; /* blue-600 */
+  background-color: #3B82F6; /* Electric Blue */
   color: #ffffff;
   border-radius: 0.25rem; /* rounded */
   display: flex;
   align-items: center;
   gap: 0.5rem; /* gap-2 */
-  transition: background-color 150ms ease, color 150ms ease;
+  transition: all 150ms ease;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  font-weight: 600;
 }
 
 .primaryButton:hover {
-  background-color: #1d4ed8; /* blue-700 */
+  background-color: #2563EB; /* Darker Electric Blue */
+  box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
+  transform: translateY(-1px);
 }
 
 .iconButton {
   padding: 0.5rem; /* p-2 */
-  color: #a3a3a3; /* neutral-400 */
+  color: #60A5FA; /* Light Electric Blue */
   border-radius: 0.25rem;
-  transition: background-color 150ms ease, color 150ms ease;
+  transition: all 150ms ease;
 }
 
 .iconButton:hover {
-  color: #ffffff;
-  background-color: rgba(255, 255, 255, 0.04);
+  color: #3B82F6;
+  background-color: rgba(59, 130, 246, 0.1);
+  transform: scale(1.05);
 }
 

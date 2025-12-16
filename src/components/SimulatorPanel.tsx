@@ -33,11 +33,13 @@ export function SimulatorPanel({
           ? 'bg-neutral-900 border-yellow-500' 
           : 'bg-neutral-900 border-neutral-700'
       }
-    `}>
+    `} style={{
+      backgroundColor: '#0F172A' // Dark Navy
+    }}>
       {/* Left: Simulator Controls */}
       <div className="w-96 border-r border-neutral-800 p-6">
         <div className="flex items-center gap-3 mb-6">
-          <Zap className="w-5 h-5 text-blue-400" />
+          <Zap className="w-5 h-5" style={{ color: '#3B82F6' }} />
           <h3 className="text-white uppercase tracking-wider text-sm">실시간 시뮬레이터</h3>
         </div>
 
@@ -46,7 +48,7 @@ export function SimulatorPanel({
           <div>
             <div className="flex justify-between items-center mb-3">
               <label className="text-neutral-400 text-sm">월 마케팅 예산</label>
-              <span className="text-blue-400 text-xl font-bold">
+              <span className="text-xl font-bold" style={{ color: '#3B82F6' }}>
                 ₩{(marketingBudget / 10000).toFixed(0)}만
               </span>
             </div>
@@ -73,10 +75,14 @@ export function SimulatorPanel({
                 className={`
                   flex-1 px-3 py-2 rounded text-xs transition-all font-medium
                   ${marketingBudget === preset 
-                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/50' 
+                    ? 'text-white shadow-lg' 
                     : 'bg-neutral-800 text-neutral-400 hover:bg-neutral-700'
                   }
                 `}
+                style={marketingBudget === preset ? {
+                  backgroundColor: '#3B82F6',
+                  boxShadow: '0 10px 15px -3px rgba(59, 130, 246, 0.5)'
+                } : {}}
               >
                 {preset >= 1000000 ? `${preset / 1000000}백만` : `${preset / 10000}만`}
               </button>
@@ -86,7 +92,7 @@ export function SimulatorPanel({
 
         {isSimulating && (
           <div className="mt-6 text-center">
-            <div className="inline-block animate-spin rounded-full h-6 w-6 border-2 border-blue-500 border-t-transparent"></div>
+            <div className="inline-block animate-spin rounded-full h-6 w-6 border-2 border-t-transparent" style={{ borderColor: '#3B82F6', borderTopColor: 'transparent' }}></div>
             <p className="text-xs text-neutral-500 mt-2">계산 중...</p>
           </div>
         )}
@@ -106,12 +112,12 @@ export function SimulatorPanel({
             
             <div className="grid grid-cols-5 gap-4 flex-1">
               {/* Revenue Card */}
-              <div className="bg-neutral-800 rounded-xl p-4 border border-neutral-700 hover:border-blue-500 transition-all">
+              <div className="bg-neutral-800 rounded-xl p-4 border border-neutral-700 transition-all hover:border-[#3B82F6]">
                 <div className="flex items-center gap-2 text-neutral-400 text-xs mb-2">
                   <DollarSign className="w-4 h-4" />
                   <span>매출</span>
                 </div>
-                <p className="text-2xl text-blue-400 mb-1">
+                <p className="text-2xl mb-1" style={{ color: '#3B82F6' }}>
                   ₩{(simulationResult.totalRevenue / 10000).toFixed(0)}만
                 </p>
                 <p className="text-xs text-neutral-500">
@@ -149,10 +155,13 @@ export function SimulatorPanel({
               <div className={`
                 col-span-2 rounded-2xl p-6 border-2 transition-all
                 ${isProfit 
-                  ? 'bg-gradient-to-br from-green-950/50 to-green-900/30 border-green-500 shadow-xl shadow-green-500/20' 
-                  : 'bg-gradient-to-br from-red-950/50 to-red-900/30 border-red-500 shadow-xl shadow-red-500/20'
+                  ? 'border-green-500 shadow-xl shadow-green-500/20' 
+                  : 'border-red-500 shadow-xl shadow-red-500/20'
                 }
-              `}>
+              `} style={{
+                backgroundColor: isProfit ? 'rgba(34, 197, 94, 0.05)' : '#0F172A',
+                borderColor: isProfit ? '#22C55E' : '#EF4444'
+              }}>
                 <div className="flex flex-col items-center justify-center h-full">
                   <div className="flex items-center gap-3 mb-3">
                     {isProfit ? (
@@ -210,7 +219,11 @@ export function SimulatorPanel({
           {diagnostics.filter(d => d.type === 'error').map(diagnostic => (
             <div
               key={diagnostic.id}
-              className="p-4 bg-red-950/30 border border-red-900 rounded-xl"
+              className="p-4 border-2 rounded-xl"
+              style={{
+                backgroundColor: '#0F172A',
+                borderColor: '#EF4444'
+              }}
             >
               <div className="flex items-start gap-3">
                 <AlertTriangle className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" />
@@ -234,11 +247,15 @@ export function SimulatorPanel({
           {diagnostics.filter(d => d.type === 'suggestion').map(diagnostic => (
             <div
               key={diagnostic.id}
-              className="p-4 bg-blue-950/20 border border-blue-900 rounded-xl"
+              className="p-4 border-2 rounded-xl"
+              style={{
+                backgroundColor: '#0F172A',
+                borderColor: '#3B82F6'
+              }}
             >
               <div className="flex items-start gap-3">
-                <Lightbulb className="w-4 h-4 text-blue-400 flex-shrink-0 mt-0.5" />
-                <p className="text-sm text-blue-300 leading-relaxed">{diagnostic.message}</p>
+                <Lightbulb className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: '#3B82F6' }} />
+                <p className="text-sm leading-relaxed" style={{ color: '#60A5FA' }}>{diagnostic.message}</p>
               </div>
             </div>
           ))}

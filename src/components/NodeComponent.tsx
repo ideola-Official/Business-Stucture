@@ -276,7 +276,7 @@ export function NodeComponent({
             <TrendingUp className="w-3 h-3" />
             CTR
           </span>
-          <span className="text-sm text-blue-400 font-semibold">
+          <span className="text-sm font-semibold" style={{ color: '#3B82F6' }}>
             {node.data.ctr}%
           </span>
         </div>
@@ -326,12 +326,17 @@ export function NodeComponent({
           bg-neutral-800 rounded-2xl border-2 transition-all shadow-xl
           ${
             isSelected
-              ? "border-blue-500 shadow-2xl shadow-blue-500/30 scale-105"
+              ? "shadow-2xl scale-105"
               : profitBorder
           }
-          ${isConnecting ? "ring-4 ring-blue-500/30" : ""}
           hover:shadow-2xl hover:scale-102
         `}
+        style={isSelected ? {
+          borderColor: '#3B82F6',
+          boxShadow: '0 25px 50px -12px rgba(59, 130, 246, 0.3)'
+        } : isConnecting ? {
+          boxShadow: '0 0 0 4px rgba(59, 130, 246, 0.3)'
+        } : {}}
       >
         {/* Status Bar - Left Side */}
         <div

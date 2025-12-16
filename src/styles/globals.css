@@ -1,5 +1,14 @@
 @import "tailwindcss";
 
+/* 커스텀 색상 정의 */
+:root {
+  --electric-blue: #3B82F6;
+  --electric-blue-hover: #2563EB;
+  --electric-blue-light: #60A5FA;
+  --dark-navy: #0F172A;
+  --dark-navy-lighter: #1E293B;
+}
+
 * {
   box-sizing: border-box;
   margin: 0;

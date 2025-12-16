@@ -14,18 +14,29 @@ export function Console({ diagnostics }: ConsoleProps) {
       case 'warning':
         return <AlertTriangle className="w-4 h-4 text-yellow-400" />;
       case 'suggestion':
-        return <Lightbulb className="w-4 h-4 text-blue-400" />;
+        return <Lightbulb className="w-4 h-4" style={{ color: '#3B82F6' }} />;
     }
   };
 
   const getColorClass = (type: DiagnosticMessage['type']) => {
     switch (type) {
       case 'error':
-        return 'bg-red-500/10 border-red-500/30 text-red-300';
+        return 'border-red-500 text-red-300';
       case 'warning':
-        return 'bg-yellow-500/10 border-yellow-500/30 text-yellow-300';
+        return 'border-yellow-500 text-yellow-300';
       case 'suggestion':
-        return 'bg-blue-500/10 border-blue-500/30 text-blue-300';
+        return 'border-[#3B82F6] text-[#60A5FA]';
+    }
+  };
+
+  const getBgStyle = (type: DiagnosticMessage['type']) => {
+    switch (type) {
+      case 'error':
+        return { backgroundColor: '#0F172A' };
+      case 'warning':
+        return { backgroundColor: 'rgba(234, 179, 8, 0.05)' };
+      case 'suggestion':
+        return { backgroundColor: '#0F172A' };
     }
   };
 
@@ -44,7 +55,7 @@ export function Console({ diagnostics }: ConsoleProps) {
         <div className="flex items-center gap-4 text-xs">
           <span className="text-red-400">{errorCount} 오류</span>
           <span className="text-yellow-400">{warningCount} 경고</span>
-          <span className="text-blue-400">{suggestionCount} 제안</span>
+          <span style={{ color: '#3B82F6' }}>{suggestionCount} 제안</span>
         </div>
       </div>
 
@@ -57,7 +68,8 @@ export function Console({ diagnostics }: ConsoleProps) {
           diagnostics.map(diagnostic => (
             <div
               key={diagnostic.id}
-              className={`px-4 py-3 rounded border ${getColorClass(diagnostic.type)} flex items-start gap-3`}
+              className={`px-4 py-3 rounded border-2 ${getColorClass(diagnostic.type)} flex items-start gap-3`}
+              style={getBgStyle(diagnostic.type)}
             >
               {getIcon(diagnostic.type)}
               <div className="flex-1">

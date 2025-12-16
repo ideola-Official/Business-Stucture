@@ -83,7 +83,7 @@ export function Inspector({ selectedNode, onUpdateNode }: InspectorProps) {
             />
 
             <div className="pt-4 border-t border-neutral-800">
-              <h4 className="text-xs text-blue-400 mb-3 flex items-center gap-2">
+              <h4 className="text-xs mb-3 flex items-center gap-2" style={{ color: '#3B82F6' }}>
                 <Zap className="w-3 h-3" />
                 시뮬레이션 변수
               </h4>
@@ -179,7 +179,7 @@ export function Inspector({ selectedNode, onUpdateNode }: InspectorProps) {
             </div>
 
             <div className="pt-4 border-t border-neutral-800 space-y-3">
-              <h4 className="text-xs text-blue-400 mb-1 flex items-center gap-2">
+              <h4 className="text-xs mb-1 flex items-center gap-2" style={{ color: '#3B82F6' }}>
                 <Zap className="w-3 h-3" />
                 시뮬레이션 변수
               </h4>
@@ -249,7 +249,7 @@ export function Inspector({ selectedNode, onUpdateNode }: InspectorProps) {
             />
 
             <div className="pt-4 border-t border-neutral-800 space-y-3">
-              <h4 className="text-xs text-blue-400 mb-1 flex items-center gap-2">
+              <h4 className="text-xs mb-1 flex items-center gap-2" style={{ color: '#3B82F6' }}>
                 <Zap className="w-3 h-3" />
                 시뮬레이션 변수
               </h4>
@@ -327,7 +327,7 @@ export function Inspector({ selectedNode, onUpdateNode }: InspectorProps) {
             />
 
             <div className="pt-4 border-t border-neutral-800 space-y-3">
-              <h4 className="text-xs text-blue-400 mb-1 flex items-center gap-2">
+              <h4 className="text-xs mb-1 flex items-center gap-2" style={{ color: '#3B82F6' }}>
                 <Zap className="w-3 h-3" />
                 시뮬레이션 변수
               </h4>
@@ -382,7 +382,7 @@ export function Inspector({ selectedNode, onUpdateNode }: InspectorProps) {
             />
 
             <div className="pt-4 border-t border-neutral-800 space-y-3">
-              <h4 className="text-xs text-blue-400 mb-1 flex items-center gap-2">
+              <h4 className="text-xs mb-1 flex items-center gap-2" style={{ color: '#3B82F6' }}>
                 <Zap className="w-3 h-3" />
                 시뮬레이션 변수
               </h4>
@@ -449,7 +449,7 @@ export function Inspector({ selectedNode, onUpdateNode }: InspectorProps) {
             />
 
             <div className="pt-4 border-t border-neutral-800">
-              <h4 className="text-xs text-blue-400 mb-3 flex items-center gap-2">
+              <h4 className="text-xs mb-3 flex items-center gap-2" style={{ color: '#3B82F6' }}>
                 <Zap className="w-3 h-3" />
                 시뮬레이션 변수
               </h4>
@@ -523,7 +523,7 @@ export function Inspector({ selectedNode, onUpdateNode }: InspectorProps) {
             />
 
             <div className="pt-4 border-t border-neutral-800">
-              <h4 className="text-xs text-blue-400 mb-3 flex items-center gap-2">
+              <h4 className="text-xs mb-3 flex items-center gap-2" style={{ color: '#3B82F6' }}>
                 <Zap className="w-3 h-3" />
                 가격 설정
               </h4>
@@ -592,7 +592,7 @@ export function Inspector({ selectedNode, onUpdateNode }: InspectorProps) {
             />
 
             <div className="pt-4 border-t border-neutral-800">
-              <h4 className="text-xs text-blue-400 mb-3 flex items-center gap-2">
+              <h4 className="text-xs mb-3 flex items-center gap-2" style={{ color: '#3B82F6' }}>
                 <Zap className="w-3 h-3" />
                 구독 설정
               </h4>
@@ -707,7 +707,10 @@ function FormField({
           value={value || ""}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
-          className="w-full px-3 py-2 bg-neutral-800 border border-neutral-700 rounded text-white text-sm focus:outline-none focus:border-blue-500 transition-colors resize-none"
+          className="w-full px-3 py-2 bg-neutral-800 border border-neutral-700 rounded text-white text-sm focus:outline-none resize-none"
+          style={{ transition: 'border-color 150ms' }}
+          onFocus={(e) => e.target.style.borderColor = '#3B82F6'}
+          onBlur={(e) => e.target.style.borderColor = '#404040'}
           rows={3}
         />
       ) : (
@@ -717,7 +720,10 @@ function FormField({
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
           step={step}
-          className="w-full px-3 py-2 bg-neutral-800 border border-neutral-700 rounded text-white text-sm focus:outline-none focus:border-blue-500 transition-colors"
+          className="w-full px-3 py-2 bg-neutral-800 border border-neutral-700 rounded text-white text-sm focus:outline-none"
+          style={{ transition: 'border-color 150ms' }}
+          onFocus={(e) => e.target.style.borderColor = '#3B82F6'}
+          onBlur={(e) => e.target.style.borderColor = '#404040'}
         />
       )}
       {hint && <p className="text-neutral-500 text-xs mt-1">{hint}</p>}

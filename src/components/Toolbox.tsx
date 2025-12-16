@@ -130,7 +130,7 @@ export function Toolbox({ onAddNode, canvasRef }: ToolboxProps) {
       <div className="p-4 border-t border-neutral-800">
         <p className="text-neutral-500 text-xs leading-relaxed">
           블록을 드래그하여 캔버스에 추가하고 연결하세요. <br/>
-          <span className="text-blue-400">파랑=사람</span>, <span className="text-green-400">초록=수익</span>, <span className="text-red-400">빨강=비용</span>
+          <span style={{ color: '#3B82F6' }}>파랑=사람</span>, <span className="text-green-400">초록=수익</span>, <span className="text-red-400">빨강=비용</span>
         </p>
       </div>
     </aside>
